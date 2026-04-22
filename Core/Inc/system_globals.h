@@ -65,6 +65,17 @@ extern uint16_t ball_range;
 extern uint16_t ball_accum;
 extern uint8_t ball_meas_set[10];
 
+// --- UART TASK ---
+extern volatile uint8_t current_mode;
+extern volatile int16_t manual_dac_cmd[4];
+
+#ifndef UART_MODE_MANUAL_DAC
+#define UART_MODE_MANUAL_DAC 0x00
+#endif
+
+#ifndef UART_MODE_CLOSED_LOOP
+#define UART_MODE_CLOSED_LOOP 0x01
+#endif
 // ===================== HANDLERS DE PERIFÉRICOS =====================
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
@@ -83,5 +94,6 @@ extern osThreadId driveTaskHandle;
 extern osThreadId radioTaskHandle;
 extern osThreadId kickTaskHandle;
 extern osThreadId ballDetectorTaskHandle;
+extern osThreadId uartTaskHandle;
 
 #endif // SYSTEM_GLOBALS_H

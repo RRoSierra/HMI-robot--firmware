@@ -41,12 +41,17 @@ uint16_t ball_accum = 0;
 uint8_t ball_meas_set[10] = {0};
 osThreadId ballDetectorTaskHandle = NULL;
 
+// ===================== UART TASK =====================
+volatile uint8_t current_mode = UART_MODE_CLOSED_LOOP;
+volatile int16_t manual_dac_cmd[4] = {0, 0, 0, 0};
+
 // ===================== COMMON =====================
 
 // ===================== RTOS TASK HANDLES =====================
 osThreadId driveTaskHandle = NULL;
 osThreadId radioTaskHandle = NULL;
 osThreadId kickTaskHandle = NULL;
+osThreadId uartTaskHandle = NULL;
 
 // ===================== HANDLERS DE PERIFÉRICOS =====================
 I2C_HandleTypeDef hi2c1;

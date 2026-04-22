@@ -120,10 +120,11 @@ void DriveFunction(void const * argument)
         PID_Init(&motor[i].pid, pidParams, PID_STATUS_ENABLE);
     }
 
-    // Infinite loop
+    // Infinite loop - OLD
+/*
     for(;;)
     {
-        for (uint8_t i = 0; i < 4; i++)
+       /* for (uint8_t i = 0; i < 4; i++)
         {
             // Execute open loop (Motor_OLDrive) or closed loop (Motor_CLDrive) routine
             Motor_CLDrive(&motor[i], &driveDAC, speed[i]);
@@ -142,7 +143,52 @@ void DriveFunction(void const * argument)
         osDelayUntil(&timeToWait, (uint32_t)PID_SAMPLE_TIME);
     }
 }
+*/
 
+ // LOOP NUEVO
+    for(;;)
+    {
+        uint8_t mode_snapshot;
+        int16_t manual_snapshot[4];
+        float speed_snapshot[4];
+
+        taskENTER_CRITICAL();
+        mode_snapshot = current_mode;
+
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            manual_snapshot[i] = manual_dac_cmd[i];
+            speed_snapshot[i] = speed[i];
+        }
+        taskEXIT_CRITICAL();
+
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            if (mode_snapshot == UART_MODE_MANUAL_DAC)
+            {
+                /* OJO: esto usa el escalado interno MOTOR_SPEED_CONV */
+                Motor_OLDrive(&motor[i], &driveDAC, (float)manual_snapshot[i]);
+            }
+            else
+            {
+                Motor_CLDrive(&motor[i], &driveDAC, speed_snapshot[i]);
+            }
+        }
+
+        MAX581x_Code(&dribblerDAC, MAX581x_OUTPUT_A, Dribbler_SpeedSet[dribbler_sel]);
+
+        if(kick_sel && kick_flag == KICKER_CHARGED)
+        {
+            osMutexWait(kickFlagHandle, osWaitForever);
+            kick_flag = KICKER_START;
+            osMutexRelease(kickFlagHandle);
+            osMessagePut(kickQueueHandle, 0, 0);
+        }
+
+        osMessagePut(nrf24CheckHandle, 0, 0);
+        osDelayUntil(&timeToWait, (uint32_t)PID_SAMPLE_TIME);
+    }
+}
 void setSpeed(uint8_t *buffer, float *velocity, uint8_t *turn)
 {
 

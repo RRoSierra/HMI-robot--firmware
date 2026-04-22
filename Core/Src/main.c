@@ -16,6 +16,7 @@
 #include "radio_task.h"
 #include "kick_task.h"
 #include "ball_detector_task.h"
+#include "uart_task.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -34,7 +35,7 @@ void MX_I2C3_Init(void);
 void DriveFunction(void const * argument);
 void RadioFunction(void const * argument);
 void KickFunction(void const * argument);
-
+void UARTTaskFunction(void const * argument);
 int main(void)
 {
     HAL_Init();
@@ -82,12 +83,16 @@ int main(void)
     // Tareas principales del sistema
     osThreadDef(driveTask, DriveFunction, osPriorityAboveNormal, 0, 128);
     driveTaskHandle = osThreadCreate(osThread(driveTask), NULL);
-    osThreadDef(radioTask, RadioFunction, osPriorityNormal, 0, 128);
-    radioTaskHandle = osThreadCreate(osThread(radioTask), NULL);
-    osThreadDef(kickTask, KickFunction, osPriorityLow, 0, 128);
-    kickTaskHandle = osThreadCreate(osThread(kickTask), NULL);
-    osThreadDef(ballDetectorTask, BallDetectorFunction, osPriorityLow, 0, 128);
-    ballDetectorTaskHandle = osThreadCreate(osThread(ballDetectorTask), NULL);
+//    osThreadDef(radioTask, RadioFunction, osPriorityNormal, 0, 128);
+//    radioTaskHandle = osThreadCreate(osThread(radioTask), NULL);
+/*    osThreadDef(kickTask, KickFunction, osPriorityLow, 0, 128);
+*    kickTaskHandle = osThreadCreate(osThread(kickTask), NULL);
+*    osThreadDef(ballDetectorTask, BallDetectorFunction, osPriorityLow, 0, 128);
+*    ballDetectorTaskHandle = osThreadCreate(osThread(ballDetectorTask), NULL);
+* COMENTADO POR WEKITO!
+*/
+    osThreadDef(uartTask, UARTTaskFunction, osPriorityNormal, 0, 256);
+    uartTaskHandle = osThreadCreate(osThread(uartTask));
 
     osKernelStart(); // Inicia el scheduler RTOS
 
